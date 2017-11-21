@@ -1,0 +1,20 @@
+#!/bin/bash
+
+iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+iptables -t nat -F
+
+echo "1" > /proc/sys/net/ipv4/ip_forward
+
+iptables -t filter -A FORWARD -s 172.16.15.0/26 -d www.playboy.com.br -j DROP
+
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+iptables -t nat -A PREROUTING -s 172.16.15.0/26 -p tcp --dport 80 -j REDIRECT --to-port 3128
+
+iptables -t nat -A PREROUTING -s 172.16.15.0/26 -p udp --dport 80 -j REDIRECT --to-port 3128
+
+iptables -t nat -A PREROUTING -s 172.16.15.0/26 -p tcp --dport 443 -j REDIRECT --to-port 3128
+
+iptables -t nat -A PREROUTING -s 172.16.15.0/26 -p udp --dport 443 -j REDIRECT --to-port 3128
